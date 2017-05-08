@@ -1,0 +1,19 @@
+local branch="$1"
+if [[ -z "$branch" ]]; then
+    branch='master'
+fi
+BRANCHREF="$(git symbolic-ref HEAD 2>/dev/null)"
+BRANCHNAME=${BRANCHREF##refs/heads/}
+if [[ "$BRANCHNAME" == "$branch" ]]; then
+    echo "Switch to a branch first"
+    exit 1
+fi
+git checkout "$branch"
+git pull origin "$branch"
+git checkout "$BRANCHNAME"
+if [[ -n "$2" ]]; then
+    git rebase "$branch" "$2"
+else
+    git rebase "$branch"
+fi
+git push origin --force "$BRANCHNAME"
